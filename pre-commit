@@ -2,8 +2,10 @@
 git preserve-permissions --check
 return_code="$?"
 if [ "${return_code}" != "0" ]; then
+    dbfile=$(git config --bool --get preserve-permissions.file)
     autosave=$(git config --bool --get preserve-permissions.autosave)
     autosavePatch=$(git config --bool --get preserve-permissions.autosavePatch)
+    [ -z "${dbfile}" ] && dbfile=".git-preserve-permissions"
     [ -z "${autosave}" ] && autosave="false"
     [ -z "${autosavePatch}" ] && autosavePatch="true"
     if [ "${autosave}" = "false" ]; then
@@ -12,11 +14,11 @@ if [ "${return_code}" != "0" ]; then
     elif [ "${autosavePatch}" = "true" ]; then
         git preserve-permissions --save
         exec < /dev/tty
-        git add -p "/.git-preserve-permissions"
+        git add -p "${dbfile}"
         echo "Permissions saved, please redo your commit"
     else
         git preserve-permissions --save
-        git add "/.git-preserve-permissions"
+        git add "${dbfile}"
         echo "Permissions saved, please redo your commit"
     fi
     exit ${return_code}
