@@ -223,8 +223,8 @@ sub gpp_check () {
     }
     
     # Check git ls-files for unknown files
-    my $output = `git ls-files`;
-    foreach ( split("\n", $output) ) {
+    my $output = `git ls-files -z`;
+    foreach ( split("\0", $output) ) {
         if ((not -l $_) and (not exists $known_files{$_})) {
             print "File not known into $name: $_\n" if $verbose;
             $unknown_files += 1;
@@ -265,8 +265,8 @@ sub gpp_save () {
     open($fh, "> $name") or die "Could not open file: $name\n";
     printf $fh "#FORMAT:%s\n", $dataversion;
     
-    $output = `git ls-files`;
-    foreach ( split("\n", $output) ) {
+    $output = `git ls-files -z`;
+    foreach ( split("\0", $output) ) {
 	my $file = $_;
         if (-l $file) {
             printf "Skipped: '%s' is a symbolic link\n", $file if $verbose;
