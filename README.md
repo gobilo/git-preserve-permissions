@@ -10,12 +10,15 @@ Copy `git-preserve-permissions` somewhere in your PATH (maybe `~/bin`).
 
 `post-checkout` and `pre-commit` hooks are provided. You can copy them in your repository directory `.git/hooks`.
 
+For Mac OSX users install `git-preserve-permissions` into `/usr/libexec/git-core`. The environment variable set in the script called __GITPERLLIB__ needs to point to the PERL Git library which with __Xcode__ is at `/Applications/Xcode.app/Contents/Developer/usr/share/git-core/perl`
+ 
 Configuration
 =============
 
 The following configuration options are available:
 
  - `preserve-permissions.file`: storage file name (defaults to `.git-preserve-permissions`)
+ - `preserve-permissions.time`: storage time file name (defaults to `.git-preserve-times`)
  - `preserve-permissions.user`: true/false to save/restore uid (defaults to false)
  - `preserve-permissions.group`: true/false to save/restore gid (defaults to false)
  - `preserve-permissions.perms`: octal mask to select bits to save/restore (defaults to `0700`)
