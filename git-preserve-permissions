@@ -14,6 +14,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 $version = "1.2";
 use lib (split(/:/, $ENV{GITPERLLIB}));
 
@@ -68,6 +69,7 @@ $options{'file'} = ($repo->config('preserve-permissions.file') or '.git-preserve
 $options{'user'} = ($repo->config_bool('preserve-permissions.user') or 0);
 $options{'group'} = ($repo->config_bool('preserve-permissions.group') or 0);
 $options{'perms'} = oct($repo->config('preserve-permissions.perms') or '0700');
+$options{'time'} = ($repo->config('preserve-permissions.time') or '.git-preserve-times');
 
 print $gpp_name." DEBUG: settings:\n" if $debug;
 print "DEBUG: preserve-permissions.user: ".$options{'user'}."\n" if $debug;
@@ -220,7 +222,8 @@ sub gpp_check () {
 sub gpp_save () {
     print "Saving...\n" if $verbose;
     my $name = $options{'file'};
-    my $fh;
+    my $fh, $ft;
+    my $time = $options{'time'} ;
     
     my $fileexists = 'false';
     if (-e $name) {
@@ -228,6 +231,7 @@ sub gpp_save () {
     }
     
     open($fh, "> $name") or die "Could not open file: $name\n";
+    open($ft, "> $time") or die "Could not open file: $time\n" ;
     
     $output = `git ls-files`;
     foreach ( split("\n", $output) ) {
@@ -241,12 +245,15 @@ sub gpp_save () {
             $uid = '' if (not $options{'user'});
             $gid = '' if (not $options{'group'});
             printf $fh "%04o:%s:%s:%s\n", $mode, $uid, $gid, $file;
+            my ($atime,$mtime,$ctime) = (lstat($file))[8,9,10];
+            printf $ft "%s:%s:%s:%s\n", $atime, $mtime, $ctime, $file ;
         } else {
             print "WARNING: A file reported by `git ls-files` doesn't exist: $file\n";
         }
     }
     
     close($fh);
+    close($ft);
     
     if ($fileexists eq 'false') {
         print "File $name created. You may want to add it to your repository.\n"
